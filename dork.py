@@ -17,12 +17,7 @@ threadsfuzz = []
 threadsmain = []
 fuzztried = set()
 lock = threading.Lock()
-print("                                                                                                                                               By Michael Ajilore")
-ascii_art = figlet_format("CypherSweep", font="slant")
-print(colored(ascii_art, "yellow"))
-print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
-print("(2) 403 Bypass                                                                                                  spiralled outta our control                                                  ")
-user = int(input())
+4
 
 
 def Vulnsearch():
@@ -113,7 +108,21 @@ def bypass():
     print(vulnerable)
 
 
-if user == 1:
-    Vulnsearch()
-elif user == 2:
-    bypass()
+
+def mainmenu():
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print("                                                                                                                                               By Michael Ajilore")
+    ascii_art = figlet_format("CypherSweep", font="slant")
+    print(colored(ascii_art, "yellow"))
+    print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
+    print("(2) 403 Bypass                                                                                                  spiralled outta our control                                                  ")
+    user = int(input())
+
+    if user == 1:
+        Vulnsearch()
+    elif user == 2:
+        bypass()
+    else:
+        mainmenu()
+
+mainmenu()
