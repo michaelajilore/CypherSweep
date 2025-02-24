@@ -1,6 +1,8 @@
 import requests
 import threading
 import random
+from pyfiglet import figlet_format
+from termcolor import colored
 
 dorks = []
 proxies = []
@@ -11,11 +13,11 @@ vulnerable = []
 fuzzvuln = []
 fuzztried = set()
 lock = threading.Lock()
-
-print("(1) Vulnerability search")
-print("(2) 403 Bypass")
-print(" ")
-
+ 
+ascii_art = figlet_format("CypherSweep", font="slant")
+print(colored(ascii_art, "yellow"))
+print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
+print("(2) 403 Bypass                                                                                                  spiralled outta our control                                                  ")
 user = int(input())
 
 
