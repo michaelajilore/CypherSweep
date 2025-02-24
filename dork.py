@@ -107,7 +107,18 @@ def bypass():
 
     print(vulnerable)
 
-
+def helpmenu():
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print("                                                                                                                                               By Michael Ajilore")
+    ascii_art = figlet_format("CypherSweep", font="slant")
+    print(colored(ascii_art, "yellow"))
+    print("Press 1 to start Vulnerability search")
+    print("press 2 to start 403 Bypass")
+    print("Press 3 for Help menu ")
+    print("Press any other number to go back to the  main menu")
+    x = int(input("choose any number to return to main menu"))
+    if x >= 0:
+        mainmenu()
 
 def mainmenu():
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
@@ -115,13 +126,16 @@ def mainmenu():
     ascii_art = figlet_format("CypherSweep", font="slant")
     print(colored(ascii_art, "yellow"))
     print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
-    print("(2) 403 Bypass                                                                                                  spiralled outta our control                                                  ")
+    print("(2) 403 Bypass                                                                                                  spiralled outta our control                      ")
+    print("(3) Help menu")
     user = int(input())
 
     if user == 1:
         Vulnsearch()
     elif user == 2:
         bypass()
+    elif user == 3:
+        helpmenu()
     else:
         mainmenu()
 
