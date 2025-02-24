@@ -8,7 +8,7 @@ fuzz = []
 headers = [{}]
 tried = set()
 target = input("ENTER A DOMAIN")
-vulnerable = []
+vulnerable = [1,2,3]
 lock = threading.Lock()
 
 
