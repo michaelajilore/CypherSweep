@@ -1,8 +1,10 @@
 import requests
 import threading
 import random
+import multiprocessing
 from pyfiglet import figlet_format
 from termcolor import colored
+
 
 dorks = []
 proxies = []
@@ -11,6 +13,8 @@ headers = [{}]
 tried = set()
 vulnerable = []
 fuzzvuln = []
+threadsfuzz = []
+threadsmain = []
 fuzztried = set()
 lock = threading.Lock()
 print("                                                                                                                                               By Michael Ajilore")
@@ -23,6 +27,7 @@ user = int(input())
 
 def Vulnsearch():
     target = input("ENTER A DOMAIN")
+    threadcount = multiprocessing.cpu_count()
     def task(target):
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
@@ -58,27 +63,22 @@ def Vulnsearch():
                     rh = random.randint(0, len(headers)-1)
 
 
+    for i in range(threadcount):
+        thread = threading.Thread(target=task, args=(target,))
+        thread.start()
+        with lock:
+            threadsmain.append(thread)
 
+    for thread in threadsmain:
+        thread.join()
 
-    thread1 = threading.Thread(target=task, args=(target))
-    thread2 = threading.Thread(target=task, args=(target))
-    thread3 = threading.Thread(target=task, args=(target))
-    thread4 = threading.Thread(target=task, args=(target))
-
-    thread1.start()
-    thread2.start()
-    thread3.start()
-    thread4.start()
-
-    thread1.join()
-    thread2.join()
-    thread3.join()
-    thread4.join()
+ 
 
     print(vulnerable)
 
 def bypass():
     target = input("ENTER 403 DOMAIN")
+    threadcount = multiprocessing.cpu_count()
     def task2(target):
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
@@ -100,21 +100,15 @@ def bypass():
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
                     rh = random.randint(0, len(headers)-1)
+    for i in range(threadcount):
+        thread = threading.Thread(target=task2, args=(target,))
+        thread.start()
+        with lock:
+            threadsfuzz.append(thread)
 
-    thread1 = threading.Thread(target=task2, args=(target))
-    thread2 = threading.Thread(target=task2, args=(target))
-    thread3 = threading.Thread(target=task2, args=(target))
-    thread4 = threading.Thread(target=task2, args=(target))
-
-    thread1.start()
-    thread2.start()
-    thread3.start()
-    thread4.start()
-
-    thread1.join()
-    thread2.join()
-    thread3.join()
-    thread4.join()
+    for thread in threadsfuzz:
+        thread.join()
+    
 
     print(vulnerable)
 
