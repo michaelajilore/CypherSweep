@@ -13,7 +13,7 @@ vulnerable = []
 fuzzvuln = []
 fuzztried = set()
 lock = threading.Lock()
- 
+print("                                                                                                                                               By Michael Ajilore")
 ascii_art = figlet_format("CypherSweep", font="slant")
 print(colored(ascii_art, "yellow"))
 print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
