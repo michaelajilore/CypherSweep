@@ -2,6 +2,7 @@ import requests
 import threading
 import random
 import multiprocessing
+import time
 from pyfiglet import figlet_format
 from termcolor import colored
 
@@ -15,6 +16,7 @@ vulnerable = []
 fuzzvuln = []
 threadsfuzz = []
 threadsmain = []
+lapse = 2.5
 fuzztried = set()
 lock = threading.Lock()
 4
@@ -22,6 +24,13 @@ lock = threading.Lock()
 
 def Vulnsearch():
     target = input("ENTER A DOMAIN")
+    inputval = "https://" + target
+    try:
+        iv = requests.get(inputval, proxies=proxies[0])
+    except requests.exceptions.RequestException as e:
+        print(f"could not resolve domain try again")
+        time.sleep(lapse)
+        Vulnsearch()
     threadcount = multiprocessing.cpu_count()
     def task(target):
         reqcount = 0
@@ -73,6 +82,14 @@ def Vulnsearch():
 
 def bypass():
     target = input("ENTER 403 DOMAIN")
+    inputval = "https://" + target
+    try:
+        iv = requests.get(inputval, proxies=proxies[0])
+    except requests.exceptions.RequestException as e:
+        print(f"could not resolve domain try again")
+        time.sleep(lapse)
+        bypass()
+    
     threadcount = multiprocessing.cpu_count()
     def task2(target):
         reqcount = 0
@@ -115,8 +132,8 @@ def helpmenu():
     print("Press 1 to start Vulnerability search")
     print("press 2 to start 403 Bypass")
     print("Press 3 for Help menu ")
-    print("Press any other number to go back to the  main menu")
-    x = int(input("choose any number to return to main menu"))
+    print(" ")
+    x = int(input("choose any number to return to main menu: "))
     if x >= 0:
         mainmenu()
 
