@@ -15,12 +15,21 @@ vulnerable = []
 fuzzvuln = []
 threadsfuzz = []
 threadsmain = []
+flagwords = {"key tba" :"Index of /", "key tba" : "Directory listing for", "key tba" :"Parent Directory", "key tba" :".htaccess", "key tba" : "server-status", "key tba" : "root:x:0:0:", "key tba" : "boot.ini"}
 fuzztried = set()
 lock = threading.Lock()
 
 
 
+def flagcatch(r,b):
+    for key, word in flagwords.items():  
+        if word.encode() in r.content:  
+            with lock:
+                b[key] = r
+                
+
 def Vulnsearch():
+    flagscaught = {}
     target = input("ENTER A DOMAIN: ")
     inputval = "https://" + target
     try:
@@ -46,6 +55,7 @@ def Vulnsearch():
                     if s.status_code in [202,200,302]:
                         with lock:
                                 vulnerable.append("https://" + dorks[i] + target)
+                        flagcatch(s,flagscaught)
                     elif s.status_code == 403:
                         try:
                             for i in range(len(fuzz)):
@@ -55,6 +65,7 @@ def Vulnsearch():
                                 if ss.status_code in [202,200,302]:
                                     with lock:
                                         vulnerable.append("https://" + dorks[i] + target + fuzz[i])
+                                    flagcatch(ss,flagscaught)
                         except requests.exceptions.RequestException as e:
                             print(f"403 fuzz Request failed: {e}")
                 except requests.exceptions.RequestException as e:
@@ -77,9 +88,14 @@ def Vulnsearch():
 
  
 
-    print(vulnerable)
+    print(f"Vulnerable URL's: {vulnerable}")
+    print(f"Other flagged Vulns: {flagscaught}")
+
+
+
 
 def bypass():
+    flagscaught = {}
     target = input("ENTER 403 DOMAIN: ")
     inputval = "https://" + target
     try:
@@ -105,6 +121,7 @@ def bypass():
                     if ff.status_code in [202,200,302]:
                         with lock:
                             vulnerable.append("https://" + target + fuzz[i])
+                        flagcatch(ff,flagscaught)
                 except requests.exceptions.RequestException as e:
                     print(f"403 fuzz attempt failed: {e}")
                 if reqcount >= rm:
@@ -122,7 +139,8 @@ def bypass():
         thread.join()
     
 
-    print(vulnerable)
+    print(f"Vulnerable URL's: {vulnerable}")
+    print(f"Other flagged Vulns: {flagscaught}")
 
 def helpmenu():
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
