@@ -2,7 +2,6 @@ import requests
 import threading
 import random
 import multiprocessing
-import time
 from pyfiglet import figlet_format
 from termcolor import colored
 
@@ -16,20 +15,18 @@ vulnerable = []
 fuzzvuln = []
 threadsfuzz = []
 threadsmain = []
-lapse = 2.5
 fuzztried = set()
 lock = threading.Lock()
-4
+
 
 
 def Vulnsearch():
-    target = input("ENTER A DOMAIN")
+    target = input("ENTER A DOMAIN: ")
     inputval = "https://" + target
     try:
         iv = requests.get(inputval, proxies=proxies[0])
     except requests.exceptions.RequestException as e:
         print(f"could not resolve domain try again")
-        time.sleep(lapse)
         Vulnsearch()
     threadcount = multiprocessing.cpu_count()
     def task(target):
@@ -81,13 +78,12 @@ def Vulnsearch():
     print(vulnerable)
 
 def bypass():
-    target = input("ENTER 403 DOMAIN")
+    target = input("ENTER 403 DOMAIN: ")
     inputval = "https://" + target
     try:
         iv = requests.get(inputval, proxies=proxies[0])
     except requests.exceptions.RequestException as e:
         print(f"could not resolve domain try again")
-        time.sleep(lapse)
         bypass()
     
     threadcount = multiprocessing.cpu_count()
