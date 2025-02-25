@@ -31,6 +31,7 @@ def Vulnsearch():
     threadcount = multiprocessing.cpu_count()
     def task(target):
         reqcount = 0
+        rm = random.randint(50,70)
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         for i in range(len(dorks)):
@@ -58,10 +59,11 @@ def Vulnsearch():
                             print(f"403 fuzz Request failed: {e}")
                 except requests.exceptions.RequestException as e:
                     print(f"Request failed for {URL}: {e}")
-                if reqcount >= 60:
+                if reqcount >= rm:
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
                     rh = random.randint(0, len(headers)-1)
+                    rm = random.randint(50,70)
 
 
     for i in range(threadcount):
@@ -91,6 +93,7 @@ def bypass():
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
+        rm = random.randint(50, 70)
         for i in range(len(fuzz)):
             if fuzz[i] not in fuzztried:
                 with lock:
@@ -104,10 +107,11 @@ def bypass():
                             vulnerable.append("https://" + target + fuzz[i])
                 except requests.exceptions.RequestException as e:
                     print(f"403 fuzz attempt failed: {e}")
-                if reqcount >= 60:
+                if reqcount >= rm:
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
                     rh = random.randint(0, len(headers)-1)
+                    rm = random.randint(50, 70)
     for i in range(threadcount):
         thread = threading.Thread(target=task2, args=(target,))
         thread.start()
