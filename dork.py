@@ -2,6 +2,7 @@ import requests
 import threading
 import random
 import multiprocessing
+import re
 from pyfiglet import figlet_format
 from termcolor import colored
 
@@ -22,6 +23,7 @@ flagwords = {"Exposed directory" :"Index of /", "Exposed directory" : "Directory
             "(Exposed admin endpoint)" : "/admin", "(Exposed admin endpoint)" : "/phpmyadmin", "(Exposed admin endpoint)" : "/wp-admin", "(Exposed debug endpoint)" : "/debug",
             "(Exposed debug endpoint)" : "/dev", "(Exposed debug endpoint)" : "/config", "(Exposed debug endpoint)" : "/logs"}
 fuzztried = set()
+pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$"
 lock = threading.Lock()
 
 
@@ -36,13 +38,17 @@ def flagcatch(r,b):
 def Vulnsearch():
     flagscaught = {}
     target = input("ENTER A DOMAIN: ")
-    inputval = "https://" + target
-    try:
-        iv = requests.get(inputval, proxies=proxies[0])
-    except requests.exceptions.RequestException as e:
-        print(f"could not resolve domain try again")
+    if bool(re.match(pattern, target)):
+        inputval = "https://" + target
+        try:
+            iv = requests.get(inputval, proxies=proxies[0])
+        except requests.exceptions.RequestException as e:
+            print(f"could not resolve domain try again")
+            Vulnsearch()
+        threadcount = multiprocessing.cpu_count()
+    else:
+        print("Invalid domain please try again")
         Vulnsearch()
-    threadcount = multiprocessing.cpu_count()
     def task(target,flagscaught):
         reqcount = 0
         rm = random.randint(50,70)
@@ -63,13 +69,13 @@ def Vulnsearch():
                         flagcatch(s,flagscaught)
                     elif s.status_code == 403:
                         try:
-                            for i in range(len(fuzz)):
-                                bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[i]
+                            for k in range(len(fuzz)):
+                                bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
                                 ss = requests.get(bypassatt, proxies=proxies[rp], headers=headers[rh])
                                 reqcount += 1
                                 if ss.status_code in [202,200,302]:
                                     with lock:
-                                        vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[i])
+                                        vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
                                     flagcatch(ss,flagscaught)
                         except requests.exceptions.RequestException as e:
                             print(f"403 fuzz Request failed: {e}")
@@ -102,14 +108,18 @@ def Vulnsearch():
 def bypass():
     flagscaught = {}
     target = input("ENTER 403 DOMAIN: ")
-    inputval = "https://" + target
-    try:
-        iv = requests.get(inputval, proxies=proxies[0])
-    except requests.exceptions.RequestException as e:
-        print(f"could not resolve domain try again")
+    if bool(re.match(pattern, target)):
+        inputval = "https://" + target
+        try:
+            iv = requests.get(inputval, proxies=proxies[0])
+        except requests.exceptions.RequestException as e:
+            print(f"could not resolve domain try again")
+            bypass()
+        
+        threadcount = multiprocessing.cpu_count()
+    else:
+        print("Invalid domain please try again")
         bypass()
-    
-    threadcount = multiprocessing.cpu_count()
     def task2(target,flagscaught):
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
@@ -151,11 +161,15 @@ def bypass():
 def responseanalyze():
     flagscaught = {}
     target = input("ENTER 403 DOMAIN: ")
-    inputval = "https://" + target
-    try:
-        iv = requests.get(inputval, proxies=proxies[0])
-    except requests.exceptions.RequestException as e:
-        print(f"could not resolve domain try again")
+    if bool(re.match(pattern, target)):
+        inputval = "https://" + target
+        try:
+            iv = requests.get(inputval, proxies=proxies[0])
+        except requests.exceptions.RequestException as e:
+            print(f"could not resolve domain try again")
+            responseanalyze()
+    else:
+        print("Invalid domain please try again")
         responseanalyze()
     for key, value in flagwords.items():  
         if value.encode() in iv.content:  
