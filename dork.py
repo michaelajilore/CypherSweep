@@ -160,6 +160,7 @@ def bypass():
 
 def responseanalyze():
     flagscaught = {}
+<<<<<<< HEAD
     target = input("ENTER 403 DOMAIN: ")
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
@@ -170,6 +171,14 @@ def responseanalyze():
             responseanalyze()
     else:
         print("Invalid domain please try again")
+=======
+    target = input("ENTER DOMAIN: ")
+    inputval = "https://" + target
+    try:
+        iv = requests.get(inputval, proxies=proxies[0])
+    except requests.exceptions.RequestException as e:
+        print(f"could not resolve domain try again")
+>>>>>>> 8af86a5230f8d517961054f5888756db6e3b506c
         responseanalyze()
     for key, value in flagwords.items():  
         if value.encode() in iv.content:  
