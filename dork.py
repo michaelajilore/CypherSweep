@@ -150,7 +150,7 @@ def bypass():
 
 def responseanalyze():
     flagscaught = {}
-    target = input("ENTER 403 DOMAIN: ")
+    target = input("ENTER DOMAIN: ")
     inputval = "https://" + target
     try:
         iv = requests.get(inputval, proxies=proxies[0])
