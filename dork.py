@@ -7,17 +7,17 @@ from pyfiglet import figlet_format
 from termcolor import colored
 
 
-dorks = []
-proxies = []
-fuzz = []
-headers = [{}]
+dorks = [] # will be filled with dorks stored as tuples with the prefix first then the postfix being second in the pair dorks that dont have a post fix will have " " as the second pair 
+proxies = [] # will be filled with proxies 
+fuzz = [] # fuzz to be added
+headers = [{}] #will be filled with user agents 
 tried = set()
 vulnerable = []
 fuzzvuln = []
 threadsfuzz = []
 threadsmain = []
-flagwords = {"Exposed directory" :"Index of /", "Exposed directory" : "Directory listing for", "Exposed directory" :"Parent Directory", "Exposed directory" :".htaccess",
-            "Exposed directory" : "server-status", "(Linux password file)" : "root:x:0:0:", " (Windows boot file)" : "boot.ini" ,
+flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Directory listing for", "(Exposed directory)" :"Parent Directory", "(Exposed directory)" :".htaccess",
+            "(Exposed directory)" : "server-status", "(Linux password file)" : "root:x:0:0:", " (Windows boot file)" : "boot.ini" ,
             "(Environment configuration file)" : ".env", "(Possible DB credentials)": "config.php", "(Exposed version control meta data)" : ".git",
             "(Java app server config)" : "WEB-INF/web.xml", "(ASP.NET configuration)" : "appsettings.json", "(Django settings file)" : "local_settings.py",
             "(Exposed admin endpoint)" : "/admin", "(Exposed admin endpoint)" : "/phpmyadmin", "(Exposed admin endpoint)" : "/wp-admin", "(Exposed debug endpoint)" : "/debug",
@@ -70,13 +70,22 @@ def Vulnsearch():
                     elif s.status_code == 403:
                         try:
                             for k in range(len(fuzz)):
-                                bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
-                                ss = requests.get(bypassatt, proxies=proxies[rp], headers=headers[rh])
-                                reqcount += 1
-                                if ss.status_code in [202,200,302]:
-                                    with lock:
-                                        vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
-                                    flagcatch(ss,flagscaught)
+                                if dorks[i][1] == " ":
+                                    nopostfix = "https://" + dorks[i][0] + target + fuzz[k]
+                                    np = requests.get(nopostfix, proxies=proxies[rp], headers=headers[rh])
+                                    reqcount += 1
+                                    if np.status_code in [202,200,302]:
+                                        with lock:
+                                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
+                                        flagcatch(np,flagscaught)
+                                else:
+                                    bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
+                                    ss = requests.get(bypassatt, proxies=proxies[rp], headers=headers[rh])
+                                    reqcount += 1
+                                    if ss.status_code in [202,200,302]:
+                                        with lock:
+                                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
+                                        flagcatch(ss,flagscaught)
                         except requests.exceptions.RequestException as e:
                             print(f"403 fuzz Request failed: {e}")
                 except requests.exceptions.RequestException as e:
@@ -160,7 +169,6 @@ def bypass():
 
 def responseanalyze():
     flagscaught = {}
-<<<<<<< HEAD
     target = input("ENTER 403 DOMAIN: ")
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
@@ -171,14 +179,6 @@ def responseanalyze():
             responseanalyze()
     else:
         print("Invalid domain please try again")
-=======
-    target = input("ENTER DOMAIN: ")
-    inputval = "https://" + target
-    try:
-        iv = requests.get(inputval, proxies=proxies[0])
-    except requests.exceptions.RequestException as e:
-        print(f"could not resolve domain try again")
->>>>>>> 8af86a5230f8d517961054f5888756db6e3b506c
         responseanalyze()
     for key, value in flagwords.items():  
         if value.encode() in iv.content:  
