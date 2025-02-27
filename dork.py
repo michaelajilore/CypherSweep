@@ -3,6 +3,7 @@ import threading
 import random
 import multiprocessing
 import re
+import time
 from pyfiglet import figlet_format
 from termcolor import colored
 
@@ -16,6 +17,7 @@ vulnerable = []
 fuzzvuln = []
 threadsfuzz = []
 threadsmain = []
+stop_event = threading.Event()
 flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Directory listing for", "(Exposed directory)" :"Parent Directory", "(Exposed directory)" :".htaccess",
             "(Exposed directory)" : "server-status", "(Linux password file)" : "root:x:0:0:", " (Windows boot file)" : "boot.ini" ,
             "(Environment configuration file)" : ".env", "(Possible DB credentials)": "config.php", "(Exposed version control meta data)" : ".git",
@@ -26,7 +28,15 @@ fuzztried = set()
 pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$"
 lock = threading.Lock()
 
-
+def displayprogress(tried, pool, threads_list):
+    while any(thread.is_alive() for thread in threads_list):
+        if len(pool) > 0:
+            progress = (len(tried) / len(pool)) * 100
+            print(f"Task progress {progress:.2f}% ")
+        else:
+            print("Waiting for tasks...")
+        time.sleep(5)
+    print("All threads completed!")
 
 def flagcatch(r,b):
     for key, value in flagwords.items():  
@@ -36,6 +46,10 @@ def flagcatch(r,b):
                 
 
 def Vulnsearch():
+    global threadsmain
+    stop_event.clear() # Reset the flag at the start
+    threadsmain = []
+    tried = set()
     flagscaught = {}
     target = input("ENTER A DOMAIN: ")
     if bool(re.match(pattern, target)):
@@ -50,11 +64,14 @@ def Vulnsearch():
         print("Invalid domain please try again")
         Vulnsearch()
     def task(target,flagscaught):
+        global stop_event
         reqcount = 0
         rm = random.randint(50,70)
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         for i in range(len(dorks)):
+            if stop_event.is_set():
+                return
             if dorks[i] not in tried:
                 with lock:
                     tried.add(dorks[i])
@@ -87,9 +104,13 @@ def Vulnsearch():
                                             vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
                                         flagcatch(ss,flagscaught)
                         except requests.exceptions.RequestException as e:
-                            print(f"403 fuzz Request failed: {e}")
-                except requests.exceptions.RequestException as e:
-                    print(f"Request failed for {URL}: {e}")
+                            print(f"403 fuzz Request Connection error: {e}")
+                            stop_event.set()
+                            mainmenu()
+                except (KeyboardInterrupt, requests.exceptions.RequestException) as e:
+                    print(f"Request failed or interrupted for {URL}: {e}")
+                    stop_event.set()
+                    mainmenu()
                 if reqcount >= rm:
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
@@ -103,6 +124,10 @@ def Vulnsearch():
         with lock:
             threadsmain.append(thread)
 
+    progress_thread = threading.Thread(target=displayprogress, args=(tried, dorks, threadsmain))
+    progress_thread.daemon = True
+    progress_thread.start()
+
     for thread in threadsmain:
         thread.join()
 
@@ -115,7 +140,11 @@ def Vulnsearch():
 
 
 def bypass():
+    global threadsfuzz
+    stop_event.clear()
     flagscaught = {}
+    threadsfuzz = []
+    fuzztried = []
     target = input("ENTER 403 DOMAIN: ")
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
@@ -130,11 +159,14 @@ def bypass():
         print("Invalid domain please try again")
         bypass()
     def task2(target,flagscaught):
+        global stop_event
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         rm = random.randint(50, 70)
         for i in range(len(fuzz)):
+            if stop_event.is_set():
+                return
             if fuzz[i] not in fuzztried:
                 with lock:
                     fuzztried.add(fuzz[i])
@@ -146,8 +178,10 @@ def bypass():
                         with lock:
                             vulnerable.append("https://" + target + fuzz[i])
                         flagcatch(ff,flagscaught)
-                except requests.exceptions.RequestException as e:
+                except (KeyboardInterrupt, requests.exceptions.RequestException) as e:
                     print(f"403 fuzz attempt failed: {e}")
+                    stop_event.set()
+                    mainmenu()
                 if reqcount >= rm:
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
@@ -159,6 +193,10 @@ def bypass():
         with lock:
             threadsfuzz.append(thread)
 
+    progress_thread = threading.Thread(target=displayprogress, args=(fuzztried, fuzz, threadsfuzz))
+    progress_thread.daemon = True
+    progress_thread.start()
+
     for thread in threadsfuzz:
         thread.join()
     
@@ -169,7 +207,8 @@ def bypass():
 
 def responseanalyze():
     flagscaught = {}
-    target = input("ENTER 403 DOMAIN: ")
+    target = input("ENTER DOMAIN: ")
+    count = 0
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
         try:
@@ -180,9 +219,19 @@ def responseanalyze():
     else:
         print("Invalid domain please try again")
         responseanalyze()
-    for key, value in flagwords.items():  
-        if value.encode() in iv.content:  
-                flagscaught[key] = iv.url + " | " + value
+    try:
+        for key, value in flagwords.items():
+            count +=1  
+            if value.encode() in iv.content:  
+                    progress = (count // len(flagwords)) * 100
+                    if count % 5 == 0:
+                        print(f"Scan progress {progress}%")
+
+                    flagscaught[key] = iv.url + " | " + value
+    except(KeyboardInterrupt, requests.exceptions.RequestException):
+        print("Keyboard interrupt returning to menu")
+        mainmenu
+
 
     print(f"Flagged vulnerabilities: {flagscaught}")
 
@@ -196,6 +245,7 @@ def helpmenu():
     print("Option 3 to analyze HTTP response")
     print("Option 4 for help menu")
     print(" ")
+    print("Use Crtl + C to back out of any scan")
     x = int(input("choose any number to return to main menu: "))
     if x >= 0:
         mainmenu()
