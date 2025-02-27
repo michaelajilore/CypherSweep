@@ -16,7 +16,7 @@ fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??",
         "/admin/%26/","/admin/#","/admin/#/","/admin/#/./","/./admin","/./admin/","/..;/admin","/..;/admin/","/.;/admin","/.;/admin/","/;/admin",
         "/;/admin/","//;//admin","//;//admin/","/admin/./","/%2e/admin","/%2e/admin/","/%20/admin/%20","/%20/admin/%20/","/admin/..;/","/admin.json",
         "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
-        "/admin/-","/admin\/\/",""] # fuzz to be added
+        "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/ADMIN","/ADMIN/","/admin/..\\;/","/*/admin","/*/admin/","/ADM+IN","/ADM+IN/"]
 headers = [{}] #will be filled with user agents 
 tried = set()
 vulnerable = []
@@ -252,6 +252,7 @@ def helpmenu():
     print("Option 4 for help menu")
     print(" ")
     print("Use Crtl + C to back out of any scan")
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     x = int(input("choose any number to return to main menu: "))
     if x >= 0:
         mainmenu()
@@ -265,6 +266,7 @@ def mainmenu():
     print("(2) 403 Bypass                                                                                                  spiralled outta our control                      ")
     print("(3) Scan HTTP response")
     print("(4) Help menu")
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     user = int(input())
 
     if user == 1:
