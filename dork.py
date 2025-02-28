@@ -55,11 +55,11 @@ headers = [{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit
     {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/14.4 Mobile/15E148 Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/109.0.0.0 Safari/537.36"}] #will be filled with user agents 
-tried = set()
 vulnerable = []
+tried = set()
+threadsmain = []
 fuzzvuln = []
 threadsfuzz = []
-threadsmain = []
 stop_event = threading.Event()
 flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Directory listing for", "(Exposed directory)" :"Parent Directory", "(Exposed directory)" :".htaccess",
             "(Exposed directory)" : "server-status", "(Linux password file)" : "root:x:0:0:", " (Windows boot file)" : "boot.ini" ,
@@ -70,6 +70,14 @@ flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Direc
 fuzztried = set()
 pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$"
 lock = threading.Lock()
+
+def checkproxy(proxy):
+     test = "https://www.google.com"
+     check = requests.get(test, proxies=proxy)
+     if check.status_code in [200,202,302]:
+         return True
+     
+     return False
 
 def displayprogress(tried, pool, threads_list):
     while any(thread.is_alive() for thread in threads_list):
@@ -97,8 +105,11 @@ def Vulnsearch():
     target = input("ENTER A DOMAIN: ")
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
+        proxy_index = random.randint(0, len(proxies)-1)
+
         try:
-            iv = requests.get(inputval, proxies=proxies[0])
+            requests.get(inputval, proxies=proxies[proxy_index])
+
         except requests.exceptions.RequestException as e:
             print(f"could not resolve domain try again")
             Vulnsearch()
@@ -106,7 +117,7 @@ def Vulnsearch():
     else:
         print("Invalid domain please try again")
         Vulnsearch()
-    def task(target,flagscaught):
+    def task(target,flagscaught,tried):
         global stop_event
         reqcount = 0
         rm = random.randint(50,70)
@@ -317,4 +328,11 @@ def mainmenu():
     else:
         mainmenu()
 
+for i in range(len(proxies)):
+    if checkproxy(proxies[i]):
+        continue
+    else:
+       proxies.pop(i)
+    if len(proxies) == 0:
+        print("WARNING proxy list needs attention before scanning")
 mainmenu()
