@@ -1,5 +1,4 @@
 import requests
-import sys
 import threading
 import random
 import multiprocessing
@@ -61,7 +60,7 @@ headers = [{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit
     {"User-Agent": "Mozilla/5.0 (Linux; Android 9; SM-J730F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/14.4 Mobile/15E148 Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"},
-    {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/109.0.0.0 Safari/537.36"}] #will be filled with user agents 
+    {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/109.0.0.0 Safari/537.36"}] 
 vulnerable = []
 tried = set()
 threadsmain = []
@@ -135,11 +134,15 @@ def Vulnsearch():
         for i in range(len(dorks)):
             if stop_event.is_set():
                 return
-            if dorks[i] not in tried:
+            if dorks[i] not in tried and dorks[i][1] != " ":
                 with lock:
                     tried.add(dorks[i])
                     
                 URL = "https://" + dorks[i][0] + target + dorks[i][1]
+            else:
+                with lock:
+                    tried.add(dorks[i])
+                URL = "https://" + dorks[i][0] + target
                 try:            
                     s = requests.get(URL, proxies=proxies[rp], headers=headers[rh])
                     reqcount += 1
@@ -324,11 +327,11 @@ def mainmenu():
     print("                                                                                                                                               By Michael Ajilore")
     ascii_art = figlet_format("CypherSweep", font="slant")
     print(colored(ascii_art, "yellow"))
-    print("(1) Vulnerability search                                                                                        This war's a people's war against a system that's")
-    print("(2) 403 Bypass                                                                                                  spiralled outta our control                      ")
+    print("(1) Vulnerability Search")
+    print("(2) 403 Bypass")
     print("(3) Scan HTTP response")
-    print("(4) Help menu")
-    print("(5) Settings")
+    print("(4) Help menu                                                                                                   This war's a people's war against a system that's")
+    print("(5) Settings                                                                                                    spiralled outta our control                      ")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     user = int(input())
 
@@ -374,7 +377,7 @@ def threadcont():
 
 def ratelimitcont():
     global range1 , range2
-    i = int(input("Enter 1 to set rate limit range | Enter 2 for suggested range:"))
+    i = int(input("Enter 1 to set rate limit range | Enter 2 for suggested range :"))
     if i == 1:
         k = input("enter desired range  :")
         numbers = [int(i) for i in k if int(i) if i.isdigit()]
