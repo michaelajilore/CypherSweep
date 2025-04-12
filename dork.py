@@ -1,15 +1,22 @@
 import requests
+import sys
 import threading
 import random
 import multiprocessing
 import re
 import time
+import os
+import subprocess
+from stem import Signal
+from stem.control import Controller
 from pyfiglet import figlet_format
 from termcolor import colored
 
+TOR_PATH = os.path.join(os.path.dirname(__file__), "Torfolder", "tor", "tor.exe")
 
+tor_process = subprocess.Popen([TOR_PATH], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 dorks = [] # will be filled with dorks stored as tuples with the prefix first then the postfix being second in the pair dorks that dont have a post fix will have " " as the second pair 
-proxies = [] # will be filled with proxies 
+proxies = []
 fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??","/admin/?/","/admin/??","/admin/??/","/admin/..","/admin/../",
         "/admin/./","/admin/.","/admin/.//","/admin/*","/admin//*","/admin/%2f","/admin/%2f/","/admin/%20","/admin/%20/","/admin/%09","/admin/%09/",
         "/admin/%0a","/admin/%0a/","/admin/%0d","/admin/%0d/","/admin/%25","/admin/%25/","/admin/%23","/admin/%23","/admin/%26","/admin/%3f","/admin/%3f/",
@@ -70,14 +77,17 @@ flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Direc
 fuzztried = set()
 pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$"
 lock = threading.Lock()
+n = multiprocessing.cpu_count
+range1 = 50
+range2 = 70
 
-def checkproxy(proxy):
-     test = "https://www.google.com"
-     check = requests.get(test, proxies=proxy)
-     if check.status_code in [200,202,302]:
-         return True
-     
-     return False
+
+
+def change_ip():
+    with Controller.from_port(port=9051) as controller:
+        controller.authenticate(cookie_auth=True)
+        controller.signal(Signal.NEWNYM)  # Send NEWNYM signal to change the IP
+        print("Successfully changed IP!")
 
 def displayprogress(tried, pool, threads_list):
     while any(thread.is_alive() for thread in threads_list):
@@ -93,8 +103,7 @@ def flagcatch(r,b):
     for key, value in flagwords.items():  
         if value.encode() in r.content:  
             with lock:
-                b[key] = r.url + " | " + value
-                
+                b[key] = r.url + " | " + value              
 
 def Vulnsearch():
     global threadsmain
@@ -113,14 +122,14 @@ def Vulnsearch():
         except requests.exceptions.RequestException as e:
             print(f"could not resolve domain try again")
             Vulnsearch()
-        threadcount = multiprocessing.cpu_count()
+        threadcount = n
     else:
         print("Invalid domain please try again")
         Vulnsearch()
     def task(target,flagscaught,tried):
         global stop_event
         reqcount = 0
-        rm = random.randint(50,70)
+        rm = random.randint(range1,range2)
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         for i in range(len(dorks)):
@@ -169,7 +178,7 @@ def Vulnsearch():
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
                     rh = random.randint(0, len(headers)-1)
-                    rm = random.randint(50,70)
+                    rm = random.randint(range1,range2)
 
 
     for i in range(threadcount):
@@ -185,7 +194,7 @@ def Vulnsearch():
     for thread in threadsmain:
         thread.join()
 
- 
+
 
     print(f"Vulnerable URL's: {vulnerable}")
     print(f"Other flagged Vulns: {flagscaught}")
@@ -208,7 +217,7 @@ def bypass():
             print(f"could not resolve domain try again")
             bypass()
         
-        threadcount = multiprocessing.cpu_count()
+        threadcount = n
     else:
         print("Invalid domain please try again")
         bypass()
@@ -217,7 +226,7 @@ def bypass():
         reqcount = 0
         rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
-        rm = random.randint(50, 70)
+        rm = random.randint(range1, range2)
         for i in range(len(fuzz)):
             if stop_event.is_set():
                 return
@@ -240,7 +249,7 @@ def bypass():
                     reqcount = 0
                     rp = random.randint(0, len(proxies)-1)
                     rh = random.randint(0, len(headers)-1)
-                    rm = random.randint(50, 70)
+                    rm = random.randint(range1, range2)
     for i in range(threadcount):
         thread = threading.Thread(target=task2, args=(target,flagscaught))
         thread.start()
@@ -289,15 +298,20 @@ def responseanalyze():
 
     print(f"Flagged vulnerabilities: {flagscaught}")
 
+
+
+
 def helpmenu():
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     print("                                                                                                                                               By Michael Ajilore")
     ascii_art = figlet_format("CypherSweep", font="slant")
+
     print(colored(ascii_art, "yellow"))
     print("Option 1 to start Vulnerability search")
     print("Option 2 to start 403 Bypass")
     print("Option 3 to analyze HTTP response")
     print("Option 4 for help menu")
+    print("Option 5 for settings")
     print(" ")
     print("Use Crtl + C to back out of any scan")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
@@ -314,6 +328,7 @@ def mainmenu():
     print("(2) 403 Bypass                                                                                                  spiralled outta our control                      ")
     print("(3) Scan HTTP response")
     print("(4) Help menu")
+    print("(5) Settings")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     user = int(input())
 
@@ -325,14 +340,53 @@ def mainmenu():
         responseanalyze()
     elif user == 4:
         helpmenu()
+    elif user == 5:
+        Settings()
     else:
         mainmenu()
 
-for i in range(len(proxies)):
-    if checkproxy(proxies[i]):
-        continue
-    else:
-       proxies.pop(i)
-    if len(proxies) == 0:
-        print("WARNING proxy list needs attention before scanning")
+def Settings():
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print(" ")
+    print("(1) Set Thread Count")
+    print("(2) Set Rate limiting")
+    print("(3) Main menu")
+    print(" ")
+    print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    q = int(input())
+    if q == 1:
+        threadcont()
+    elif q == 2:
+        ratelimitcont()
+    elif q == 3:
+        mainmenu()
+    
+
+def threadcont():
+    global n
+    i = int(input("Enter 1 for set threads | Enter 2 to optimize threads to your system :"))
+    if i == 1:
+        k = input("enter desired thread count :")
+        n = k
+    elif i == 2:
+        n = multiprocessing.cpu_count
+    mainmenu()
+
+def ratelimitcont():
+    global range1 , range2
+    i = int(input("Enter 1 to set rate limit range | Enter 2 for suggested range:"))
+    if i == 1:
+        k = input("enter desired range  :")
+        numbers = [int(i) for i in k if int(i) if i.isdigit()]
+        range1 = numbers[0]
+        range2 = numbers[1]
+        
+    elif i == 2:
+        range1 = 50
+        range2 = 70
+    mainmenu()
+
+
+print("Loading please wait")
+time.sleep(5)
 mainmenu()
