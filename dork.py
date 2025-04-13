@@ -142,6 +142,7 @@ def Vulnsearch():
             else:
                 with lock:
                     tried.add(dorks[i])
+
                 URL = "https://" + dorks[i][0] + target
                 try:            
                     s = requests.get(URL, proxies=proxies[rp], headers=headers[rh])
@@ -379,11 +380,14 @@ def ratelimitcont():
     global range1 , range2
     i = int(input("Enter 1 to set rate limit range | Enter 2 for suggested range :"))
     if i == 1:
-        k = input("enter desired range  :")
-        numbers = [int(i) for i in k if int(i) if i.isdigit()]
-        range1 = numbers[0]
-        range2 = numbers[1]
-        
+        k = input("Enter desired range (e.g., 50 70): ")
+        try:
+            range1, range2 = map(int, k.split(" "))
+        except ValueError:
+            print("Invalid input. Please enter two numbers separated by a space.")
+            return ratelimitcont()
+
+
     elif i == 2:
         range1 = 50
         range2 = 70
