@@ -12,10 +12,12 @@ from pyfiglet import figlet_format
 from termcolor import colored
 
 TOR_PATH = os.path.join(os.path.dirname(__file__), "Torfolder", "tor", "tor.exe")
+torrc_path = os.path.join(os.path.dirname(__file__), "Torfolder", "torrc.txt",)
 
-tor_process = subprocess.Popen([TOR_PATH], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+
 dorks = [] # will be filled with dorks stored as tuples with the prefix first then the postfix being second in the pair dorks that dont have a post fix will have " " as the second pair 
-proxies = []
 fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??","/admin/?/","/admin/??","/admin/??/","/admin/..","/admin/../",
         "/admin/./","/admin/.","/admin/.//","/admin/*","/admin//*","/admin/%2f","/admin/%2f/","/admin/%20","/admin/%20/","/admin/%09","/admin/%09/",
         "/admin/%0a","/admin/%0a/","/admin/%0d","/admin/%0d/","/admin/%25","/admin/%25/","/admin/%23","/admin/%23","/admin/%26","/admin/%3f","/admin/%3f/",
@@ -84,9 +86,8 @@ range2 = 70
 
 def change_ip():
     with Controller.from_port(port=9051) as controller:
-        controller.authenticate(cookie_auth=True)
+        controller.authenticate()
         controller.signal(Signal.NEWNYM)  # Send NEWNYM signal to change the IP
-        print("Successfully changed IP!")
 
 def displayprogress(tried, pool, threads_list):
     while any(thread.is_alive() for thread in threads_list):
@@ -113,23 +114,21 @@ def Vulnsearch():
     target = input("ENTER A DOMAIN: ")
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
-        proxy_index = random.randint(0, len(proxies)-1)
 
         try:
-            requests.get(inputval, proxies=proxies[proxy_index])
+            requests.get(inputval)
 
         except requests.exceptions.RequestException as e:
-            print(f"could not resolve domain try again")
-            Vulnsearch()
+            print("could not resolve domain try again")
+            return Vulnsearch()
         threadcount = n
     else:
         print("Invalid domain please try again")
-        Vulnsearch()
+        return Vulnsearch()
     def task(target,flagscaught,tried):
         global stop_event
         reqcount = 0
         rm = random.randint(range1,range2)
-        rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         for i in range(len(dorks)):
             if stop_event.is_set():
@@ -145,7 +144,7 @@ def Vulnsearch():
 
                 URL = "https://" + dorks[i][0] + target
                 try:            
-                    s = requests.get(URL, proxies=proxies[rp], headers=headers[rh])
+                    s = requests.get(URL, headers=headers[rh])
                     reqcount += 1
                     if s.status_code in [202,200,302]:
                         with lock:
@@ -156,7 +155,7 @@ def Vulnsearch():
                             for k in range(len(fuzz)):
                                 if dorks[i][1] == " ":
                                     nopostfix = "https://" + dorks[i][0] + target + fuzz[k]
-                                    np = requests.get(nopostfix, proxies=proxies[rp], headers=headers[rh])
+                                    np = requests.get(nopostfix, headers=headers[rh])
                                     reqcount += 1
                                     if np.status_code in [202,200,302]:
                                         with lock:
@@ -164,7 +163,7 @@ def Vulnsearch():
                                         flagcatch(np,flagscaught)
                                 else:
                                     bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
-                                    ss = requests.get(bypassatt, proxies=proxies[rp], headers=headers[rh])
+                                    ss = requests.get(bypassatt, headers=headers[rh])
                                     reqcount += 1
                                     if ss.status_code in [202,200,302]:
                                         with lock:
@@ -180,7 +179,7 @@ def Vulnsearch():
                     mainmenu()
                 if reqcount >= rm:
                     reqcount = 0
-                    rp = random.randint(0, len(proxies)-1)
+                    change_ip()
                     rh = random.randint(0, len(headers)-1)
                     rm = random.randint(range1,range2)
 
@@ -216,19 +215,18 @@ def bypass():
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
         try:
-            iv = requests.get(inputval, proxies=proxies[0])
+            iv = requests.get(inputval)
         except requests.exceptions.RequestException as e:
-            print(f"could not resolve domain try again")
-            bypass()
+            print("could not resolve domain try again")
+            return bypass()
         
         threadcount = n
     else:
         print("Invalid domain please try again")
-        bypass()
+        return bypass()
     def task2(target,flagscaught):
         global stop_event
         reqcount = 0
-        rp = random.randint(0, len(proxies)-1)
         rh = random.randint(0, len(headers)-1)
         rm = random.randint(range1, range2)
         for i in range(len(fuzz)):
@@ -239,7 +237,7 @@ def bypass():
                     fuzztried.add(fuzz[i])
                     fuzzatt = "https://" + target + fuzz[i]
                 try:
-                    ff = requests.get(fuzzatt, proxies=proxies[rp], headers=headers[rh])
+                    ff = requests.get(fuzzatt, headers=headers[rh])
                     reqcount +=1 
                     if ff.status_code in [202,200,302]:
                         with lock:
@@ -251,7 +249,7 @@ def bypass():
                     mainmenu()
                 if reqcount >= rm:
                     reqcount = 0
-                    rp = random.randint(0, len(proxies)-1)
+                    change_ip()
                     rh = random.randint(0, len(headers)-1)
                     rm = random.randint(range1, range2)
     for i in range(threadcount):
@@ -279,9 +277,9 @@ def responseanalyze():
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
         try:
-            iv = requests.get(inputval, proxies=proxies[0])
+            iv = requests.get(inputval)
         except requests.exceptions.RequestException as e:
-            print(f"could not resolve domain try again")
+            print("could not resolve domain try again")
             responseanalyze()
     else:
         print("Invalid domain please try again")
@@ -395,5 +393,13 @@ def ratelimitcont():
 
 
 print("Loading please wait")
-time.sleep(5)
+
+tor_process = subprocess.Popen(
+    [TOR_PATH, "-f", torrc_path],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE
+)
+
+time.sleep(10)
+change_ip()
 mainmenu()
