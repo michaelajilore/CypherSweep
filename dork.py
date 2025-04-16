@@ -76,9 +76,9 @@ flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Direc
             "(Exposed admin endpoint)" : "/admin", "(Exposed admin endpoint)" : "/phpmyadmin", "(Exposed admin endpoint)" : "/wp-admin", "(Exposed debug endpoint)" : "/debug",
             "(Exposed debug endpoint)" : "/dev", "(Exposed debug endpoint)" : "/config", "(Exposed debug endpoint)" : "/logs"}
 fuzztried = set()
-pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$"
+pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}(?:$|\/)"
 lock = threading.Lock()
-n = multiprocessing.cpu_count
+n = multiprocessing.cpu_count()
 range1 = 50
 range2 = 70
 
@@ -234,7 +234,7 @@ def bypass():
                 return
             if fuzz[i] not in fuzztried:
                 with lock:
-                    fuzztried.add(fuzz[i])
+                    fuzztried.append(fuzz[i])
                     fuzzatt = "https://" + target + fuzz[i]
                 try:
                     ff = requests.get(fuzzatt, headers=headers[rh])
@@ -268,6 +268,7 @@ def bypass():
 
     print(f"Vulnerable URL's: {vulnerable}")
     print(f"Other flagged Vulns: {flagscaught}")
+    
 
 
 def responseanalyze():
@@ -316,6 +317,7 @@ def helpmenu():
     print("Option 5 for settings")
     print(" ")
     print("Use Crtl + C to back out of any scan")
+    print("Please ensure your device has nothing running on port 9050 or 9051 ")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
     x = int(input("choose any number to return to main menu: "))
     if x >= 0:
@@ -400,6 +402,6 @@ tor_process = subprocess.Popen(
     stderr=subprocess.PIPE
 )
 
-time.sleep(10)
+time.sleep(5)
 change_ip()
 mainmenu()
