@@ -2,4 +2,3 @@ requests
 pyfiglet
 termcolor
 stem.control
-requests[socks]
