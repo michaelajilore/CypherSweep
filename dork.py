@@ -18,10 +18,10 @@ torrc_path = os.path.join(os.path.dirname(__file__), "Torfolder", "torrc.txt",)
 
 
 dorks = [] # will be filled with dorks stored as tuples with the prefix first then the postfix being second in the pair dorks that dont have a post fix will have " " as the second pair 
-fuzz = ["/admin/?","//admin//","///admin///","/./admin/./","/admin?","/admin??","/admin/?/","/admin/??","/admin/??/","/admin/..","/admin/../",
-        "/admin/./","/admin/.","/admin/.//","/admin/*","/admin//*","/admin/%2f","/admin/%2f/","/admin/%20","/admin/%20/","/admin/%09","/admin/%09/",
-        "/admin/%0a","/admin/%0a/","/admin/%0d","/admin/%0d/","/admin/%25","/admin/%25/","/admin/%23","/admin/%23","/admin/%26","/admin/%3f","/admin/%3f/",
-        "/admin/%26/","/admin/#","/admin/#/","/admin/#/./","/./admin","/./admin/","/..;/admin","/..;/admin/","/.;/admin","/.;/admin/","/;/admin",
+fuzz = [("/","/?"),("//","//"),("///","///"),("/./","/./"),("/","?"),("/","??"),("/","/?/"),("/","/??"),("/","/??/"),("/","/.."),("/","/../"),
+        ("/","/./"),("/","/."),("/","/.//"),("/","/*"),("/","//*"),("/","/%2f"),("/","/%2f/"),("/","/%20"),("/","/%20/"),("/","/%09"),("/","/%09/"),
+        ("/","/%0a"),("/","/%0a/"),("/","/%0d"),("/","/%0d/"),("/","/%25"),("/","/%25/"),("/","/%23"),("/","/%23"),("/","/%26"),("/","/%3f"),("/","/%3f/"),
+        ("/","/%26/"),("/","/#"),("/","/#/"),("/","/#/./"),("/./",""),("/./","/"),("/..;/",""),"/..;/admin/","/.;/admin","/.;/admin/","/;/admin",
         "/;/admin/","//;//admin","//;//admin/","/admin/./","/%2e/admin","/%2e/admin/","/%20/admin/%20","/%20/admin/%20/","/admin/..;/","/admin.json",
         "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
         "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/ADMIN","/ADMIN/","/admin/..\\;/","/*/admin","/*/admin/","/ADM+IN","/ADM+IN/"] # convert to tuples
