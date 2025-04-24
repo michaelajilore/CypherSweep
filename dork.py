@@ -26,6 +26,11 @@ fuzz = [("/","/?"),("//","//"),("///","///"),("/./","/./"),("/","?"),("/","??"),
         "/admin/.json","/admin..;/","/admin;/","/admin%00","/admin.css","/admin.html","/admin?id=1","/admin~","/admin/~","/admin/°/","/admin/&",
         "/admin/-","/admin\\/\\/","/admin/..%3B/","/admin/;%2f..%2f..%2f","/admin/..\\;/","/*/admin","/*/admin/","/ADMIN","/ADMIN/","/ADM+IN","/ADM+IN/"] # convert to tuples
 
+proxies = {
+    'http': 'socks5h://127.0.0.1:9050',
+    'https': 'socks5h://127.0.0.1:9050'
+}
+
 bypass_payloads = {
     "admin": [
         "//admin//", "///admin///", "/admin//login", "/admin///index",
@@ -162,8 +167,7 @@ def Vulnsearch():
         inputval = "https://" + target
 
         try:
-            requests.get(inputval)
-
+            requests.get(inputval, proxies=proxies, headers=headers[random.randint(0,len(headers) - 1)])
         except requests.exceptions.RequestException as e:
             print("could not resolve domain try again")
             return Vulnsearch()
@@ -183,18 +187,18 @@ def Vulnsearch():
             URL = "https://" + dorks[i][0] + target + dorks[i][1] + dorks[i][2]
 
             try:            
-                s = requests.get(URL, headers=headers[rh])
+                s = requests.get(URL, headers=headers[rh], proxies=proxies)
                 reqcount += 1
                 if s.status_code in [202,200,302]:
                     with lock:
-                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1])
+                            vulnerable.append("https://" + dorks[i][0] + target + dorks[i][1] + dorks[i][2])
                     flagcatch(s,flagscaught)
                 elif s.status_code == 403:
                     try:
                         for payload_list in bypass_payloads.values():
                             for payload in payload_list:
                                 req = "https://" + target + payload
-                                r = requests.get(req, headers=headers[rh])
+                                r = requests.get(req, headers=headers[rh], proxies=proxies)
                                 reqcount += 1 
 
                                 if r.status_code in [202,200,302]:
@@ -247,7 +251,7 @@ def bypass():
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
         try:
-            iv = requests.get(inputval)
+            iv = requests.get(inputval, proxies=proxies, headers=headers[random.randint(0,len(headers) - 1)])
         except requests.exceptions.RequestException as e:
             print("could not resolve domain try again")
             return bypass()
@@ -283,7 +287,7 @@ def bypass():
                 else:
                     fuzzatt = "https://" + fuzz[i][0] + core + fuzz[i][1]
                 try:
-                    ff = requests.get(fuzzatt, headers=headers[rh])
+                    ff = requests.get(fuzzatt, headers=headers[rh], proxies=proxies)
                     reqcount +=1 
                     if ff.status_code in [202,200,302]:
                         with lock:
@@ -326,7 +330,7 @@ def responseanalyze():
     if bool(re.match(pattern, target)):
         inputval = "https://" + target
         try:
-            iv = requests.get(inputval)
+            iv = requests.get(inputval, proxies=proxies, headers=headers[random.randint(0,len(headers) - 1)])
         except requests.exceptions.RequestException as e:
             print("could not resolve domain try again")
             responseanalyze()
