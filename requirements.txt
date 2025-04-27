@@ -3,3 +3,4 @@ pyfiglet
 termcolor
 stem.control
 requests[socks]
+bs4

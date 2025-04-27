@@ -130,7 +130,7 @@ flagwords = {"(Exposed directory)" :"Index of /", "(Exposed directory)" : "Direc
 fuzztried = set()
 pattern = r"^(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}(?:$|\/)"
 lock = threading.Lock()
-n = multiprocessing.cpu_count()
+tc = [multiprocessing.cpu_count()]
 range1 = 50
 range2 = 70
 
@@ -170,11 +170,11 @@ def Vulnsearch():
             requests.get(inputval, proxies=proxies, headers=headers[random.randint(0,len(headers) - 1)])
         except requests.exceptions.RequestException as e:
             print("could not resolve domain try again")
-            return Vulnsearch()
-        threadcount = n
+            Vulnsearch()
+       # threadcount = n
     else:
         print("Invalid domain please try again")
-        return Vulnsearch()
+        Vulnsearch()
     def task(target,flagscaught,tried):
         global stop_event
         reqcount = 0
@@ -220,7 +220,7 @@ def Vulnsearch():
                     rm = random.randint(range1,range2)
 
 
-    for i in range(threadcount):
+    for i in range(tc[0]):
         thread = threading.Thread(target=task, args=(target,flagscaught))
         thread.start()
         with lock:
@@ -254,9 +254,9 @@ def bypass():
             iv = requests.get(inputval, proxies=proxies, headers=headers[random.randint(0,len(headers) - 1)])
         except requests.exceptions.RequestException as e:
             print("could not resolve domain try again")
-            return bypass()
+            bypass()
         
-        threadcount = n
+       # threadcount = n
     else:
         print("Invalid domain please try again")
         return bypass()
@@ -271,6 +271,7 @@ def bypass():
         if lastslash == 5 or lastslash == 6:
             lastslash = 7
         core = target[lastslash + 1:len(target)]
+        base = target[0:lastslash]
         rh = random.randint(0, len(headers)-1)
         rm = random.randint(range1, range2)
         for i in range(len(fuzz)):
@@ -280,12 +281,12 @@ def bypass():
                 with lock:
                     fuzztried.append(fuzz[i])
                 if i == len(fuzz) - 4 or i == len(fuzz) - 3:
-                    fuzzatt = "https://" + fuzz[i][0] + core.upper() + fuzz[i][1]
+                    fuzzatt = "https://" + base + fuzz[i][0] + core.upper() + fuzz[i][1]
                 elif i == len(fuzz) - 2 or i == len(fuzz) - 1:
                     coreup = core.upper()
-                    fuzzatt = "https://" + fuzz[i][0] + coreup[0:(len(coreup) - 1) // 2] + "+" + coreup[(len(coreup) - 1) // 2: len(coreup)] + fuzz[i][1]
+                    fuzzatt = "https://" + base + fuzz[i][0] + coreup[0:(len(coreup) - 1) // 2] + "+" + coreup[(len(coreup) - 1) // 2: len(coreup)] + fuzz[i][1]
                 else:
-                    fuzzatt = "https://" + fuzz[i][0] + core + fuzz[i][1]
+                    fuzzatt = "https://" + base + fuzz[i][0] + core + fuzz[i][1]
                 try:
                     ff = requests.get(fuzzatt, headers=headers[rh], proxies=proxies)
                     reqcount +=1 
@@ -304,7 +305,7 @@ def bypass():
                     rm = random.randint(range1, range2)
 
              
-    for i in range(threadcount):
+    for i in range(tc[0]):
         thread = threading.Thread(target=task2, args=(target,flagscaught))
         thread.start()
         with lock:
@@ -348,7 +349,7 @@ def responseanalyze():
                     flagscaught[key] = iv.url + " | " + value
     except(KeyboardInterrupt, requests.exceptions.RequestException):
         print("Keyboard interrupt returning to menu")
-        mainmenu
+        return mainmenu
 
 
     print(f"Flagged vulnerabilities: {flagscaught}")
@@ -386,17 +387,17 @@ def mainmenu():
     print("(4) Help menu                                                                                                   This war's a people's war against a system that's")
     print("(5) Settings                                                                                                    spiralled outta our control                      ")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
-    user = int(input())
+    user = input()
 
-    if user == 1:
+    if user == "1":
         Vulnsearch()
-    elif user == 2:
+    elif user == "2":
         bypass()
-    elif user == 3:
+    elif user == "3":
         responseanalyze()
-    elif user == 4:
+    elif user == "4":
         helpmenu()
-    elif user == 5:
+    elif user == "5":
         Settings()
     else:
         mainmenu()
@@ -409,41 +410,50 @@ def Settings():
     print("(3) Main menu")
     print(" ")
     print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------")
-    q = int(input())
-    if q == 1:
+    q = input()
+    if q == "1":
         threadcont()
-    elif q == 2:
+    elif q == "2":
         ratelimitcont()
-    elif q == 3:
+    elif q == "3":
         mainmenu()
     
 
 def threadcont():
-    global n
-    i = int(input("Enter 1 for set threads | Enter 2 to optimize threads to your system :"))
-    if i == 1:
-        k = input("enter desired thread count :")
-        n = k
-    elif i == 2:
-        n = multiprocessing.cpu_count
-    return mainmenu()
+    global tc
+    print(f"Current Thread Count:{tc[0]}")
+    i = input("Enter 1 for set threads | Enter 2 to optimize threads to your system :")
+    if i == "1":
+        k = int(input("enter desired thread count :"))
+        tc[0] = k
+    elif i == "2":
+        tc[0] = multiprocessing.cpu_count()
+    if tc[0] != multiprocessing.cpu_count():
+        print(f"change succesful thread count is {tc[0]}")
+    else:
+        print(f"change failed thread count is {tc[0]}")
+        tc[0] = 3
+        print(f"att2 thread count is {tc[0]}")
+
+    mainmenu()
 
 def ratelimitcont():
     global range1 , range2
-    i = int(input("Enter 1 to set rate limit range | Enter 2 for suggested range :"))
-    if i == 1:
+    print(f"Current Range : {range1},{range2}")
+    i = input("Enter 1 to set rate limit range | Enter 2 for suggested range :")
+    if i == "1":
         k = input("Enter desired range (e.g., 50 70): ")
         try:
             range1, range2 = map(int, k.split(" "))
         except ValueError:
             print("Invalid input. Please enter two numbers separated by a space.")
-            return ratelimitcont()
+            ratelimitcont()
 
 
-    elif i == 2:
+    elif i == "2":
         range1 = 50
         range2 = 70
-    return mainmenu()
+    mainmenu()
 
 
 print("Loading please wait")
