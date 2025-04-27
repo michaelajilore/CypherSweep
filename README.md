@@ -1,13 +1,40 @@
 CypherSweep
-CypherSweep is a multithreaded web vulnerability scanner tool designed to find exposed directories, admin interfaces, and bypass 403 forbidden responses. It utilizes Tor for IP rotation to avoid rate limiting and detection.
+                                                                          
+                                                                                                                                               By Michael Ajilore
+   ______            __              _____
+  / ____/_  ______  / /_  ___  _____/ ___/      _____  ___  ____
+ / /   / / / / __ \/ __ \/ _ \/ ___/\__ \ | /| / / _ \/ _ \/ __ \
+/ /___/ /_/ / /_/ / / / /  __/ /   ___/ / |/ |/ /  __/  __/ /_/ /
+\____/\__, / .___/_/ /_/\___/_/   /____/|__/|__/\___/\___/ .___/
+     /____/_/                                           /_/
+
+CypherSweep is a versatile web security reconnaissance tool designed to identify potential vulnerabilities in websites. It uses TOR for anonymity and employs various techniques including Google Dorking, 403 bypass attempts, and HTTP response analysis.
 Features
 
-Vulnerability Scanner: Searches for exposed directories and vulnerable endpoints
-403 Bypass: Attempts various techniques to bypass 403 Forbidden responses
-HTTP Response Analysis: Scans for sensitive information in HTTP responses
-Tor Integration: Routes traffic through Tor for anonymity and IP rotation
-Multithreaded: Optimized for performance with configurable thread count
-Rate Limiting: Configurable request rate limiting to avoid detection
+Vulnerability Search: Scans domains using a comprehensive list of Google dorks to identify potentially vulnerable endpoints.
+403 Bypass: Attempts to bypass 403 Forbidden responses using various techniques.
+HTTP Response Analysis: Analyzes HTTP responses for common security issues.
+TOR Integration: Routes all requests through TOR for anonymity and IP rotation.
+Multi-threaded Operation: Optimizes scanning speed with configurable thread settings.
+
+Customizable Settings:
+
+Thread count
+Rate limiting
+Scan breadth
+
+
+
+Installation
+
+Clone the repository:
+
+git clone https://github.com/your-username/cyphersweep.git
+cd cyphersweep
+
+Install required packages:
+
+pip install -r requirements.txt
 
 Installation
 Prerequisites
@@ -37,7 +64,7 @@ torrc.txt configuration file
 
 Directory Structure
 CypherSweep/
-├── cyphersweep.py
+├── dork.py
 ├── requirements.txt
 ├── README.md
 └── Torfolder/
@@ -46,7 +73,7 @@ CypherSweep/
     └── torrc.txt
 Usage
 Run the tool:
-python cyphersweep.py
+python dork.py
 Main Menu Options
 
 Vulnerability Search: Scans a domain for common vulnerabilities
@@ -69,7 +96,7 @@ Can be manually configured in the Settings menu
 
 Rate Limiting
 
-Default: 50-70 requests before IP rotation
+Default: 20-30 requests before IP rotation
 Can be adjusted in the Settings menu
 
 Disclaimer
