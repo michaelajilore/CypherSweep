@@ -1,12 +1,7 @@
 CypherSweep
                                                                           
-                                                                                                                                               By Michael Ajilore
-   ______            __              _____
-  / ____/_  ______  / /_  ___  _____/ ___/      _____  ___  ____
- / /   / / / / __ \/ __ \/ _ \/ ___/\__ \ | /| / / _ \/ _ \/ __ \
-/ /___/ /_/ / /_/ / / / /  __/ /   ___/ / |/ |/ /  __/  __/ /_/ /
-\____/\__, / .___/_/ /_/\___/_/   /____/|__/|__/\___/\___/ .___/
-     /____/_/                                           /_/
+ By Michael Ajilore
+
 
 CypherSweep is a versatile web security reconnaissance tool designed to identify potential vulnerabilities in websites. It uses TOR for anonymity and employs various techniques including Google Dorking, 403 bypass attempts, and HTTP response analysis.
 Features
@@ -29,7 +24,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/your-username/cyphersweep.git
+git clone https://github.com/michaelajilore/CypherSweep
 cd cyphersweep
 
 Install required packages:
@@ -42,25 +37,12 @@ Prerequisites
 Python 3.6+
 Tor (bundled in the package)
 
-Setup
-
-Clone the repository:
-git clone https://github.com/michaelajilore/CypherSweep
-cd cyphersweep
-
-Install required Python packages:
-pip install -r requirements.txt
-
 Verify Tor folder structure:
 
 Ensure you have a Torfolder directory containing:
 
 tor subdirectory with tor.exe
 torrc.txt configuration file
-
-
-
-
 
 Directory Structure
 CypherSweep/
